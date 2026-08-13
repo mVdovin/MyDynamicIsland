@@ -1,0 +1,179 @@
+﻿<Window x:Class="MyDynamicIsland.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="My Dynamic Island" 
+        Width="1280" Height="400"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        PreviewMouseLeftButtonDown="Window_PreviewMouseLeftButtonDown"
+        PreviewMouseMove="Window_PreviewMouseMove"
+        PreviewMouseLeftButtonUp="Window_PreviewMouseLeftButtonUp"
+        xmlns:local="clr-namespace:MyDynamicIsland">
+
+    <Window.Resources>
+        <CubicEase x:Key="FluentEase" EasingMode="EaseOut"/>
+
+        <SolidColorBrush x:Key="SurfaceBackground" Color="#1F1F1F"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#99FFFFFF"/>
+        <SolidColorBrush x:Key="AccentPrimary" Color="#00E676"/>
+
+        <Style x:Key="IslandButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#22808080"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#11808080"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль кнопки закрытия со скруглением угла -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource IslandButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBorder" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E81123"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="RootGrid" ClipToBounds="False">
+
+        <Grid x:Name="IslandContainer"
+              Height="40"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              MouseEnter="IslandContainer_MouseEnter"
+              MouseLeave="IslandContainer_MouseLeave"
+              SizeChanged="IslandContainer_SizeChanged"
+              ClipToBounds="False">
+
+            <!-- СЛОЙ ФОНА -->
+            <Grid x:Name="BackgroundGrid" RenderTransformOrigin="0.5,0.0" Cursor="Hand">
+                <Grid.RenderTransform>
+                    <ScaleTransform x:Name="IslandScale" ScaleX="1" ScaleY="1"/>
+                </Grid.RenderTransform>
+
+                <Canvas ClipToBounds="False" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Path x:Name="IslandPath"
+                          Fill="{DynamicResource SurfaceBackground}"
+                          ClipToBounds="False">
+                        <Path.Effect>
+                            <DropShadowEffect x:Name="IslandShadow" 
+                                              Color="Black" 
+                                              BlurRadius="12" 
+                                              ShadowDepth="3" 
+                                              Direction="270"
+                                              Opacity="0.45"
+                                              RenderingBias="Performance"/>
+                        </Path.Effect>
+                    </Path>
+                </Canvas>
+            </Grid>
+
+            <!-- СЛОЙ КОНТЕНТА -->
+            <Grid x:Name="ContentGrid" ClipToBounds="False">
+                <!-- 1. КОМПАКТНЫЙ РЕЖИМ (Универсальный контейнер) -->
+                <Grid x:Name="CompactContent" Opacity="1" Margin="12,0,12,0" MaxWidth="1230">
+                    <ContentControl x:Name="CompactContentControl"
+                                    Content="{Binding CompactContent}"
+                                    FontFamily="Consolas"
+                                    Foreground="{DynamicResource TextPrimary}"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Typography.NumeralAlignment="Tabular"/>
+                </Grid>
+
+                <!-- 2. РАСШИРЕННЫЙ РЕЖИМ (Универсальный макет с динамической высотой) -->
+                <!-- РАСШИРЕННЫЙ РЕЖИМ -->
+                <Grid x:Name="ExpandedContent"
+                      Opacity="0"
+                      Visibility="Collapsed"
+                      Margin="8,8,8,10">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Шапка (отступ вниз 12px до контента) -->
+                    <DockPanel Grid.Row="0" Margin="2,8,0,6">
+                        <TextBlock Text="{Binding HeaderTitle}"
+                                   Foreground="{DynamicResource TextPrimary}"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="🎨"
+                                    Style="{StaticResource IslandButtonStyle}"
+                                    Click="ThemeButton_Click"
+                                    ToolTip="Переключить тему оформления"
+                                    Margin="0,0,4,0"/>
+
+                            <Button Content="Свернуть"
+                                    Style="{StaticResource IslandButtonStyle}"
+                                    Click="MinimizeButton_Click"
+                                    Margin="0,0,4,0"/>
+
+                            <Button Content="✕"
+                                    Style="{StaticResource CloseButtonStyle}"
+                                    Click="CloseButton_Click"
+                                    Width="26"/>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Универсальная область для любого вложенного контента -->
+                    <ContentControl Grid.Row="1"
+                                    x:Name="ExpandedContentControl"
+                                    Content="{Binding ExpandedContent}"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
