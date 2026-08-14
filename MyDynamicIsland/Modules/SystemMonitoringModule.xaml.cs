@@ -176,7 +176,7 @@ namespace MyDynamicIsland
                     // Вспомогательная локальная функция для добавления только валидных данных
                     void AddPart(bool condition, string value) { if (condition) cpuParts.Add(value); }
 
-                    AddPart(stats.CpuLoad > 0, $"{stats.CpuLoad,2}%");
+                    AddPart(stats.CpuLoad >= 0, $"{stats.CpuLoad,2}%");
                     AddPart(stats.CpuFreqGhz > 0, $"{stats.CpuFreqGhz,3:F2} ГГц");
                     AddPart(stats.CpuTemp > 0, $"{cpuTempStr,3}");
 
@@ -201,13 +201,13 @@ namespace MyDynamicIsland
                     // Вспомогательная локальная функция для добавления только валидных данных
                     void AddPart(bool condition, string value) { if (condition) gpuParts.Add(value); }
 
-                    AddPart(stats.CpuLoad > 0, $"{stats.GpuLoad,2}%");
+                    AddPart(stats.CpuLoad >= 0, $"{stats.GpuLoad,2}%");
                     AddPart(stats.CpuFreqGhz > 0, $"{stats.GpuFreqGhz,3:F2} ГГц");
                     AddPart(stats.CpuTemp > 0, $"{gpuTempStr,3}");
 
                     if (gpuParts.Count > 0)
                     {
-                        compactParts.Add($"CPU: {string.Join(" • ", gpuParts)}");
+                        compactParts.Add($"GPU: {string.Join(" • ", gpuParts)}");
                     }
                 }
                 else GpuText.Text = "Вимкнено користувачем";

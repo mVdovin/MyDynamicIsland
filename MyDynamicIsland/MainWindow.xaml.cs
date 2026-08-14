@@ -72,7 +72,7 @@ namespace MyDynamicIsland
         private const double CompactHeight = 40.0;
         private const double ExpandedWidth = 360.0;
         private const double EarRadius = 14.0;
-        private const double HoverScale = 1.031;
+        private const double HoverScale = 1.028;
 
         private readonly TimeSpan _sizeDuration = TimeSpan.FromSeconds(0.3);
         private readonly TimeSpan _fadeDuration = TimeSpan.FromSeconds(0.15);
